@@ -1,0 +1,38 @@
+{
+  "name": "nuxt_git_review",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare && husky",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "nuxt typecheck",
+    "check": "yarn lint && yarn typecheck",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "nuxt": "^4.6.4",
+    "vue": "^3.5.45",
+    "vue-router": "^5.4.0"
+  },
+  "packageManager": "yarn@4.13.0",
+  "engines": {
+    "node": "^22.21.0 || ^24.11.0 || >=26.0.0"
+  },
+  "lint-staged": {
+    "*.{vue,js,cjs,mjs,jsx,ts,cts,mts,tsx}": "eslint --max-warnings=0"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1",
+    "eslint": "^10",
+    "husky": "^9",
+    "lint-staged": "^17",
+    "rolldown": "~1.2.1",
+    "typescript": "~5.9.3",
+    "vue-tsc": "^3"
+  }
+}

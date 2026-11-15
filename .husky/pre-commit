@@ -1,0 +1,10 @@
+log=$(git rev-parse --git-path hook-checks.log)
+printf '%s pre-commit started\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$log"
+printf '[git-hook] pre-commit: starting checks\n'
+if yarn exec lint-staged; then
+  result=0
+else
+  result=$?
+fi
+printf '%s pre-commit exit=%s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$result" >> "$log"
+exit "$result"
