@@ -50,3 +50,19 @@ Yarn 仍报告 Nuxt/ESLint 依赖内部的 peer 警告；项目直接依赖的 T
 失败时保留错误输出及日志以定位；不要绕过 hooks。首次提交前 lint-staged 会提示无法创建备份，测试时保留原文件副本。
 
 只有上述 GUI 操作和日志得到对应验证后，才能将 GUI 触发、真实远端推送和 CI 标记为已通过。
+
+## GUI 首次提交的实际观察
+
+用户确认已通过 Codex Git 界面点击提交，产生 `f27b915`（测试 Codex 提交 hooks），工作区干净；但没有生成正式 hooks 的 `hook-checks.log`。仓库的 `core.hooksPath=.husky/_` 及可执行权限正常。
+
+结论：本次 GUI 提交没有留下正式校验执行证据，不能标记为通过。尚不能确定是客户端跳过 hooks、运行环境提前退出，还是其他原因。
+
+下一步使用本地生成目录中的原生阻断探针，在 Husky 初始化前记录执行并返回失败，以排除 Node、Yarn、nvm、HUSKY 环境变量影响。该探针不纳入版本控制，复测后恢复正式入口。
+
+## 真实 ESLint 错误复测准备（2026-11-16）
+
+已恢复正式 Husky 入口，停止使用无条件失败探针。基线 HEAD 为 `f27b91511f2c25a80365bd28e2aac4296ce1d26c`，正式 hook 日志尚不存在；基线保存在 Git 本地目录中。
+
+临时文件 `app/hook-lint-probe.ts` 包含未使用变量；独立 ESLint 检查确认报出 `@typescript-eslint/no-unused-vars`，退出码 1。仅该测试文件已暂存，本文档修改未暂存。
+
+下一步由用户在 Codex Git 界面提交，说明为 `test: verify GUI pre-commit`。通过标准为 ESLint 错误阻断提交、正式日志出现非零退出码、HEAD 不变。目前 GUI 复测结果待确认；完成后移除测试文件和暂存内容。
