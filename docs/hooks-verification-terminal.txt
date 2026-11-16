@@ -1,0 +1,2 @@
+
+# verification terminal triggers hooks, which in turn invoke the skill
