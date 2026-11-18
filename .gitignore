@@ -25,3 +25,6 @@ logs
 
 # Yarn local installation state
 .yarn/install-state.gz
+
+# code-review 临时产物
+tmp/
