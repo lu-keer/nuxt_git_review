@@ -5,6 +5,20 @@ description: '审查 branch、tag、commit 或工作区变更，排除文档与 
 
 只审查并报告问题，不修改被审查代码。主会话负责材料准备、规则委派、调度、候选核查与汇总，不代审规则；委派已授权，不重复询问。
 
+## 显式推送登记（可选）
+
+仅当用户明确请求按推送登记流程审查，并指定 remote 和目标完整分支 ref 时启用。日常工作区审查与修改后的自动审查不登记 HEAD，不改变其默认范围。
+
+1. 在项目根目录执行 `node scripts/review-gate.mjs begin --remote <name> --target refs/heads/<branch>`。工作区必须干净；只支持当前分支到已有远端分支的单 ref 非空快进。读取输出的 requestPath、requestId、baseOid 和 headOid；失败停止，不自动 fetch 或推送。
+2. 按第 1 节用固定 `--base <baseOid>` 调用原 helper，核对 repositoryRoot、baseCommit 与当前 HEAD 等于 headOid。不重新定义审查材料、不逐一审查中间提交。
+3. 按第 2～5 节执行现有六路审查、核查和报告。主会话登记真实任务身份和有效终态，不代审、不伪造完成状态。有 findings 不影响“已完整执行”的登记；任一必要任务未完成则不登记。
+4. 报告后、删除 manifest 前，在请求所在的 Git 元数据目录保存结果 JSON：requestId、manifestPath（本次绝对路径）、manifestBaseOid、completion completed、coverage reviewed、tasks、verificationTasks、findings。findings 包含 critical/major/minor 非负整数计数。
+5. tasks 恰好包含 standards、architect、devops、product_contract、runtime_performance、security 六个 ruleId；每项包含唯一非空 taskId、status completed、outputValid true。Summary 不是任务。verificationTasks 列出所有实际激活的核实任务，同样要求完成有效，并带 ruleId 和 parentTaskId；前置任务必须有效完成。不得漏登记失败或未知状态任务。
+6. 执行 `node scripts/review-gate.mjs complete --request <requestPath> --result <结果JSON绝对路径>`，如实报告输出。此命令信任主会话的结果，不独立证明宿主任务执行；禁止以命令成功代替真实审查。失败不自动重试或自动修复。
+7. complete 读取原始 manifest 后，再按原有停止确认条件清理准确 tempDirectory；任务停止不明时不登记、不清理。用户随后自行从原 Git 入口推送。
+
+`textFileCount === 0` 时仍不启动 worker。显式推送登记模式必须先保留 manifest 进行 complete：没有非排除二进制变更时使用 coverage exempt、exemptReason no_reviewable_text、tasks/verificationTasks 空数组、findings 全零；说明“按范围豁免”，不声称六路通过。任何非排除二进制变更（含混合文本）都不登记，说明文本审查无法覆盖，然后按原有条件清理。默认非登记模式的空材料清理行为保持不变。
+
 ## 1. 构建快照
 
 在被审查项目目录执行 `node <skill绝对路径>/scripts/build-review-manifest.mjs [--base <fixed-point>]`，保持 cwd 指向目标项目，不切换到 skill 安装目录；核对返回 manifest 的 `repositoryRoot` 与目标仓库一致。未指定固定点时仅审 staged、unstaged、untracked；用户指定 branch、tag、commit 等 git ref 时传 `--base`，同时审该点到 HEAD 的提交和未提交变更。不改变扫描范围。

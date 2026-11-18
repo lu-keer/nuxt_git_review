@@ -3,6 +3,8 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "review:gate": "node scripts/review-gate.mjs",
+    "test:review-gate": "node --test scripts/review-gate.test.mjs",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
